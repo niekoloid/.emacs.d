@@ -1,0 +1,11 @@
+auto-save-list/
+backup/
+elpa/
+eshell/
+magithub/
+undohist/
+*#*
+*~*
+smex-items
+places
+*.dat
