@@ -21,7 +21,7 @@
 ;; ;; load-pathを追加する関数を定義
 ;; 
 
-;; 引数のディレクトリとそのサブディレクトリをload-pathに追加
+;; 引数のディレクトリとそのサブディレクトリをload-pathに追加 
 ;; 
 
 ;;; P63 Emacsが自動的に書き込む設定をcustom.elに保存する
@@ -36,6 +36,7 @@
 ;;; P112-113 ELPAリポジトリを追加する
 ;; (require 'package) ; package.elを有効化
 
+(package-initialize) 
 ;;(add-to-list
 ;; 'package-archives
 ;; '("marmalade" . "https://marmalade-repo.org/packages/"))
@@ -57,7 +58,6 @@
 (package-install 'smex)
 (package-install 'swiper)
 (package-install 'flycheck)
-(package-install 'flycheck-rust)
 (package-install 'intero)
 (package-install 'haskell-mode)
 (package-install 'lsp-rust)
@@ -87,9 +87,11 @@
 (package-install 'wgrep)
 (package-install 'undohist)
 (package-install 'undo-tree)
+(package-install 'eldoc)
 ;;(package-install 'point-undo)
+;;(package-install 'toml-mode)
 
-(package-initialize) 
+
 ;; Apply above installed packages
 ;; Added by Package.el.  This must come before configurations of
 ;; installed packages.  Don't delete this line.  If you don't want it,
@@ -105,6 +107,9 @@
 (define-key global-map (kbd "C-t") 'other-window)
 (define-key global-map (kbd "C-c l") 'toggle-truncate-lines)
 (define-key global-map (kbd "C-;") 'comment-dwim)
+
+
+(global-auto-revert-mode t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 6.4 入力の効率化                                       ;;
@@ -222,7 +227,7 @@
 (global-linum-mode t)
 
 
-;; 
+;; custom.el?
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -293,7 +298,6 @@
 (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
 (global-set-key (kbd "C-c g") 'counsel-git)
 (global-set-key (kbd "C-c j") 'counsel-git-grep)
-
 ;; (global-set-key (kbd "C-c k") 'counsel-ag)
 ;; (global-set-key (kbd "C-x l") 'counsel-locate)
 
@@ -322,16 +326,6 @@
 (require 'intero)
 (add-hook 'haskell-mode-hook 'intero-mode)
 
-;; rust
-(require 'rust-mode)
-(define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
-(setq company-tooltip-align-annotations t)
-(add-hook 'rust-mode-hook #'racer-mode)
-(add-hook 'racer-mode-hook #'eldoc-mode)
-(add-hook 'racer-mode-hook #'company-mode)
-(add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
-(add-hook 'rust-mode-hook #'linum-mode)
-
 ;; enable advanced functions
 (put 'narrow-to-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
@@ -341,7 +335,14 @@
 
 (provide 'init)
 
-;;; init.el ends here
+
+;; hook for emacs-lisp-mode
+(add-hook 'emacs-lisp-mode-hook
+          '(lambda ()
+             (when (require 'eldoc nil t)
+               (setq eldoc-idle-delay 0.2)
+               (setq eldoc-echo-area-use-multiline-p t)
+               (turn-on-eldoc-mode))))          
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -351,3 +352,31 @@
 ;;; P119-121 テーマの変更)
 ;; zenburnテーマを利用する
 (load-theme 'zenburn t)
+
+
+;; Rust mode
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
+
+;; cargo.el
+(add-hook 'rust-mode-hook 'cargo-minor-mode)
+
+;: rustfmt
+(add-hook 'rust-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c <tab>") #'rust-format-buffer)))
+
+(defun indent-buffer ()
+  "Indent current buffer according to major mode."
+  (interactive)
+  (indent-region (point-min) (point-max)))
+
+;; racer
+(setq racer-cmd "~/.cargo/bin/racer") ;; Rustup binaries PATH
+(setq racer-rust-src-path "~/.cargo/registry/src") ;; Rust source code PATH 
+
+(add-hook 'rust-mode-hook #'racer-mode)
+(add-hook 'racer-mode-hook #'eldoc-mode)
+(add-hook 'racer-mode-hook #'company-mode)
+
+;; flycheck-rust
+(add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
