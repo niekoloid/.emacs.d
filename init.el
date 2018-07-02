@@ -26,7 +26,7 @@
 
 ;;; P63 Emacsが自動的に書き込む設定をcustom.elに保存する
 ;; カスタムファイルを別ファイルにする
-(setq custom-file (locate-user-emacs-file "custom.el"))
+;;(setq custom-file (locate-user-emacs-file "custom.el"))
 ;; (カスタムファイルが存在しない場合は作成する
 (unless (file-exists-p custom-file)
   (write-region "" nil custom-file))
@@ -37,21 +37,21 @@
 ;; (require 'package) ; package.elを有効化
 
 (package-initialize) 
-;;(add-to-list
-;; 'package-archives
-;; '("marmalade" . "https://marmalade-repo.org/packages/"))
+(add-to-list
+ 'package-archives
+ '("marmalade" . "https://marmalade-repo.org/packages/"))
 
-;; (add-to-list
-;;  'package-archives
-;;  '("melpa" . "https://melpa.org/packages/"))
+ (add-to-list
+  'package-archives
+  '("melpa" . "https://melpa.org/packages/"))
 
-;; (add-to-list
-;; 'package-archives
-;; '("gnu" . "https://elpa.gnu.org/packages/"))
+ (add-to-list
+ 'package-archives
+ '("gnu" . "https://elpa.gnu.org/packages/"))
 
 ;; 最新のpackageリストを読み込む
-;;(when (not package-archive-contents)
-;;  (package-refresh-contents))
+(when (not package-archive-contents)
+  (package-refresh-contents))
 
 ;; install packages (skip if exist)
 (package-install 'ace-window)
@@ -88,6 +88,9 @@
 (package-install 'undohist)
 (package-install 'undo-tree)
 (package-install 'eldoc)
+
+(package-install 'neotree)
+(package-install 'protobuf-mode)
 ;;(package-install 'point-undo)
 ;;(package-install 'toml-mode)
 
@@ -375,7 +378,7 @@
 (setq racer-rust-src-path "~/.cargo/registry/src") ;; Rust source code PATH 
 
 (add-hook 'rust-mode-hook #'racer-mode)
-(add-hook 'racer-mode-hook #'eldoc-mode)
+;;(add-hook 'racer-mode-hook #'eldoc-mode)
 (add-hook 'racer-mode-hook #'company-mode)
 
 ;; flycheck-rust
